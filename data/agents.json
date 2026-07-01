@@ -1,0 +1,570 @@
+[
+  {
+    "id": "agent-ars",
+    "slug": "agent-ars",
+    "name": "ARS — Auto Replenishment",
+    "description": "Distributor replenishment agent for CPG-OS: ideal-order recommendation, modification review, fund coverage, and ERP push.",
+    "longDescription": "ARS 2.0 is the Auto-Replenishment agent under FieldAssist CPG-OS. It exposes ~12 typed actions through CLI, API, UI, and MCP surfaces. Domain modules are wired through 7 pluggable strategy interfaces (Forecast, Quantity, Allocation, Approval, Scheduling, Lifecycle, Truncation). Built on .NET 9 (engine/API/CLI/MCP), Python 3.12 (ML forecasting), and Nuxt 4 (console UI).",
+    "category": "ops",
+    "status": "draft",
+    "version": "0.1.0",
+    "owner": "Kumar Prakarsh",
+    "team": "ARS Squad",
+    "tags": [
+      "cpg",
+      "replenishment",
+      "forecasting",
+      "distributor",
+      "mcp",
+      "cpg-os"
+    ],
+    "icon": "📦",
+    "repoUrl": "https://github.com/kumarprakarsh/agent-ars",
+    "createdAt": "2026-06-15T00:00:00.000Z",
+    "updatedAt": "2026-07-02T00:00:00.000Z",
+    "technicalScores": {
+      "reliability": 85,
+      "latency": 95,
+      "toolUse": 92,
+      "safety": 88,
+      "maintainability": 84,
+      "documentation": 80
+    },
+    "scoreNotes": {
+      "latency": "Tier-S load test passed at 30 rps with P95 37ms on recommend_replenishment.",
+      "safety": "Eval gate includes fail-closed contract lock verification before ERP push.",
+      "toolUse": "12 typed actions across CLI, API, UI, and MCP surfaces."
+    },
+    "evalSuites": [
+      {
+        "id": "suite-evalgate",
+        "name": "F-EVALGATE — Pre-Registered Evaluation Gate",
+        "description": "Forecasting gate correctness: WAPE, MASE, bootstrap CI, tiering, determinism",
+        "lastRunAt": "2026-06-24T00:00:00.000Z",
+        "passRate": 100,
+        "totalCases": 12,
+        "passedCases": 12,
+        "cases": [
+          {
+            "id": "C1",
+            "name": "Pooled WAPE",
+            "description": "Weighted absolute percentage error computation",
+            "category": "capability",
+            "passed": true,
+            "score": 100,
+            "latencyMs": 45
+          },
+          {
+            "id": "C10",
+            "name": "Lock fail closed",
+            "description": "Contract lock verification fails closed on mismatch",
+            "category": "safety",
+            "passed": true,
+            "score": 100,
+            "latencyMs": 12
+          }
+        ]
+      },
+      {
+        "id": "suite-load-tier-s",
+        "name": "Tier-S Load Test",
+        "description": "30 rps sustained for 5 min against real Postgres — P95 < 2000ms SLO",
+        "lastRunAt": "2026-06-19T17:20:35.000Z",
+        "passRate": 100,
+        "totalCases": 4,
+        "passedCases": 4,
+        "cases": [
+          {
+            "id": "lt1",
+            "name": "recommend_replenishment",
+            "description": "POST /v1/runs — 2400 requests, 0 failures, P95 37ms",
+            "category": "latency",
+            "passed": true,
+            "score": 100,
+            "latencyMs": 37
+          }
+        ]
+      }
+    ],
+    "gtm": {
+      "tagline": "Automate distributor replenishment with auditable, strategy-pluggable intelligence",
+      "valueProposition": "Generate ideal orders, validate distributor modifications, check fund coverage, and push to ERP — all through a normalized CLI · API · UI · MCP contract under CPG-OS.",
+      "targetAudience": [
+        "CPG brand supply chain teams",
+        "Distributor operations",
+        "FieldAssist platform teams"
+      ],
+      "useCases": [
+        "Ideal order recommendation",
+        "Distributor modification review & escalation",
+        "Fund coverage evaluation",
+        "CP-WH stock allocation",
+        "SKU fitness classification & forecast tuning"
+      ],
+      "pricingTier": "TBD",
+      "readinessChecklist": [
+        {
+          "item": "Agent manifest published (12 actions)",
+          "completed": true
+        },
+        {
+          "item": "Tier-S load test passed (30 rps)",
+          "completed": true
+        },
+        {
+          "item": "Eval gate suites (F-EVALGATE, F-CLEAN-RESOLVE)",
+          "completed": true
+        },
+        {
+          "item": "Product demo video recorded",
+          "completed": false
+        },
+        {
+          "item": "Sales one-pager published",
+          "completed": false
+        },
+        {
+          "item": "Customer case study",
+          "completed": false
+        }
+      ]
+    }
+  },
+  {
+    "id": "agent-dedup",
+    "slug": "dedup",
+    "name": "Outlet Dedupe",
+    "description": "Detects duplicate CPG outlet records using storefront-photo similarity, geo, phone, GSTIN, and reviewable evidence.",
+    "longDescription": "Headless outlet-deduplication agent for CPG field-sales teams. Tier M foundation with API + UI + CLI + MCP over one Python application/core layer. Finds duplicate or low-quality outlet records, explains the evidence, and prepares safe recommendations to retire duplicates or recapture poor photos. Works standalone or as a CPG-OS action agent.",
+    "category": "ops",
+    "status": "beta",
+    "version": "0.1.0",
+    "owner": "FieldAssist Product",
+    "team": "fieldassist-product",
+    "tags": [
+      "cpg",
+      "deduplication",
+      "outlet",
+      "field-sales",
+      "mcp",
+      "cpg-os",
+      "vision"
+    ],
+    "icon": "🔍",
+    "repoUrl": "https://github.com/wandering-green/dedup",
+    "createdAt": "2026-06-01T00:00:00.000Z",
+    "updatedAt": "2026-07-02T00:00:00.000Z",
+    "technicalScores": {
+      "reliability": 82,
+      "latency": 75,
+      "toolUse": 90,
+      "safety": 92,
+      "maintainability": 86,
+      "documentation": 88
+    },
+    "scoreNotes": {
+      "latency": "Photo similarity and VLM corroboration add latency; load test not yet verified.",
+      "safety": "Human-in-the-loop retirement flow, VLM evidence checks, and tenant auth scoping.",
+      "toolUse": "API, MCP, CLI, and UI surfaces over a shared Python core."
+    },
+    "evalSuites": [
+      {
+        "id": "suite-agent-contract",
+        "name": "Agent Contract Tests",
+        "description": "Manifest, API, MCP, and A2A contract conformance",
+        "lastRunAt": "2026-06-28T00:00:00.000Z",
+        "passRate": 100,
+        "totalCases": 30,
+        "passedCases": 30,
+        "cases": [
+          {
+            "id": "ac1",
+            "name": "Manifest schema validation",
+            "description": "agent.manifest.json matches published contract",
+            "category": "contract",
+            "passed": true,
+            "score": 100
+          },
+          {
+            "id": "ac2",
+            "name": "MCP tools discovery",
+            "description": "GET /mcp/tools returns dedupe_outlets",
+            "category": "contract",
+            "passed": true,
+            "score": 100
+          },
+          {
+            "id": "ac3",
+            "name": "A2A agent card",
+            "description": "GET /.well-known/agent-card.json is valid",
+            "category": "contract",
+            "passed": true,
+            "score": 100
+          }
+        ]
+      },
+      {
+        "id": "suite-backend",
+        "name": "Backend Test Suite",
+        "description": "Photo evidence, VLM verification, auth scoping, FA native handover",
+        "lastRunAt": "2026-06-28T00:00:00.000Z",
+        "passRate": 100,
+        "totalCases": 65,
+        "passedCases": 65,
+        "cases": [
+          {
+            "id": "b1",
+            "name": "Photo evidence clustering",
+            "description": "Multi-signal outlet clustering with reviewable evidence",
+            "category": "capability",
+            "passed": true,
+            "score": 95
+          },
+          {
+            "id": "b2",
+            "name": "VLM corroboration",
+            "description": "Vision adjudication corroborates photo similarity",
+            "category": "safety",
+            "passed": true,
+            "score": 92
+          },
+          {
+            "id": "b3",
+            "name": "Auth tenant scoping",
+            "description": "Bearer token scopes runs to tenant",
+            "category": "safety",
+            "passed": true,
+            "score": 100
+          }
+        ]
+      }
+    ],
+    "gtm": {
+      "tagline": "Clean outlet master data with photo-grounded duplicate detection",
+      "valueProposition": "Find duplicate or low-quality outlet records, explain the evidence, and prepare safe retire-or-recapture recommendations — via UI, API, CLI, MCP, or CPG-OS orchestration.",
+      "targetAudience": [
+        "CPG sales-ops and audit teams",
+        "Field sales operations",
+        "CPG-OS platform integrators"
+      ],
+      "useCases": [
+        "Duplicate outlet detection across photo, geo, and metadata signals",
+        "Human-in-the-loop retirement recommendations",
+        "Standalone outlet-master cleanup platform",
+        "CPG-OS action agent for outlet-quality signals",
+        "FA outlet master live deduplication"
+      ],
+      "pricingTier": "TBD",
+      "readinessChecklist": [
+        {
+          "item": "Agent manifest published",
+          "completed": true
+        },
+        {
+          "item": "API + MCP + CLI + UI surfaces",
+          "completed": true
+        },
+        {
+          "item": "Backend test suite passing",
+          "completed": true
+        },
+        {
+          "item": "Load test verified",
+          "completed": false
+        },
+        {
+          "item": "Product demo video recorded",
+          "completed": false
+        },
+        {
+          "item": "Customer case study",
+          "completed": false
+        }
+      ]
+    }
+  },
+  {
+    "slug": "micromarket",
+    "name": "Micromarket",
+    "description": "FieldAssist Micromarket / Location Intelligence platform.",
+    "longDescription": "React, Vite, and Node.js application for micromarket and geospatial analysis. The app serves a built frontend and Express API from one container. - Frontend: React, TypeScript, Vite - Backend: Node.js, Express, TypeScript via `tsx` - Runtime port: `3001`",
+    "category": "internal",
+    "status": "draft",
+    "version": "0.1.0",
+    "owner": "FieldAssist",
+    "team": "FieldAssist",
+    "tags": [
+      "github"
+    ],
+    "icon": "🤖",
+    "repoUrl": "https://github.com/FieldAssist/micromarket",
+    "technicalScores": {
+      "reliability": 70,
+      "latency": 70,
+      "toolUse": 70,
+      "safety": 70,
+      "maintainability": 70,
+      "documentation": 70
+    },
+    "evalSuites": [],
+    "gtm": {
+      "tagline": "",
+      "valueProposition": "FieldAssist Micromarket / Location Intelligence platform.",
+      "targetAudience": [
+        "Product teams",
+        "Platform engineers",
+        "GTM leads"
+      ],
+      "useCases": [],
+      "readinessChecklist": [
+        {
+          "item": "Agent manifest published",
+          "completed": false
+        },
+        {
+          "item": "0 action(s) defined",
+          "completed": false
+        },
+        {
+          "item": "Load test verified",
+          "completed": false
+        },
+        {
+          "item": "Product demo video recorded",
+          "completed": false
+        },
+        {
+          "item": "Sales one-pager published",
+          "completed": false
+        },
+        {
+          "item": "Customer case study",
+          "completed": false
+        }
+      ]
+    },
+    "id": "3a7de9ca-918c-4032-aa3a-cfc9d3cf67d6",
+    "createdAt": "2026-07-01T20:00:04.809Z",
+    "updatedAt": "2026-07-01T20:00:04.809Z"
+  },
+  {
+    "id": "7282f2f1-5cfc-4e11-916d-fc260ceb53e2",
+    "slug": "perfect-store-cpgos",
+    "name": "Perfect Store",
+    "description": "Depth-specialist agent for CPG-OS that validates Perfect Store KPI anomalies with deterministic evidence and authors reversible, HITL-gated Plugs for FA rule/focus area deployment. Diagnoses 21 diagnosable KPIs (Sales, Coverage, Discipline, MT, Campaign, Supply Chain) against con",
+    "longDescription": "Depth-specialist agent for **CPG-OS** that validates Perfect Store KPI anomalies with deterministic evidence and authors reversible, HITL-gated Plugs for FieldAssist rule/focus area deployment. The CPG-OS supervisor senses anomalies and hands hypotheses to this agent. This agent validates them against 21 diagnosable KPIs using deterministic math, returns a verdict (`confirm | refute | inconclusive`) with typed outputs (`Observation | Diagnosis | Opportunity | Plug`), and — on approval — executes the Plug against FA tables. **One agent, one job:** validate Perfect Store KPI hypotheses and autho",
+    "category": "ops",
+    "status": "draft",
+    "version": "0.1.0",
+    "owner": "rajsinghaipm",
+    "team": "rajsinghaipm",
+    "tags": [
+      "tier-S",
+      "perfect-store-agent",
+      "github"
+    ],
+    "icon": "📦",
+    "repoUrl": "https://github.com/rajsinghaipm/perfect-store-cpgos",
+    "createdAt": "2026-07-01T20:57:02.743Z",
+    "updatedAt": "2026-07-01T20:57:02.745Z",
+    "technicalScores": {
+      "reliability": 70,
+      "latency": 70,
+      "toolUse": 82,
+      "safety": 70,
+      "maintainability": 70,
+      "documentation": 70
+    },
+    "evalSuites": [],
+    "gtm": {
+      "tagline": "",
+      "valueProposition": "Depth-specialist agent for CPG-OS that validates Perfect Store KPI anomalies with deterministic evidence and authors reversible, HITL-gated Plugs for FA rule/focus area deployment. Diagnoses 21 diagnosable KPIs (Sales, Coverage, Discipline, MT, Campaign, Supply Chain) against contextual thresholds. .NET 9 + Parquet on Azure Blob + Nuxt 4. Tier S",
+      "targetAudience": [
+        "Product teams",
+        "Platform engineers",
+        "GTM leads"
+      ],
+      "useCases": [
+        "Supervisor hands a hypothesis; agent validates it with deterministic KPI computation and returns a verdict with typed evidence.",
+        "On a confirmed diagnosis, agent authors a reversible, HITL-gated Perfect Store rule/focus-area configuration as a Plug.",
+        "Executes an approved Plug against FA Perfect Store tables and emits a RunResult with changes[].",
+        "Measures the KPI impact of a deployed intervention (pre/post) when the supervisor delegates outcome measurement."
+      ],
+      "readinessChecklist": [
+        {
+          "item": "Agent manifest published",
+          "completed": true
+        },
+        {
+          "item": "4 action(s) defined",
+          "completed": true
+        },
+        {
+          "item": "Load test verified",
+          "completed": false
+        },
+        {
+          "item": "Product demo video recorded",
+          "completed": false
+        },
+        {
+          "item": "Sales one-pager published",
+          "completed": false
+        },
+        {
+          "item": "Customer case study",
+          "completed": false
+        }
+      ]
+    }
+  },
+  {
+    "slug": "revbridge",
+    "name": "Revbridge",
+    "description": "Agent imported from varunn12/revbridge",
+    "longDescription": "Agent imported from varunn12/revbridge",
+    "category": "internal",
+    "status": "draft",
+    "version": "0.1.0",
+    "owner": "varunn12",
+    "team": "varunn12",
+    "tags": [
+      "github"
+    ],
+    "icon": "🤖",
+    "repoUrl": "https://github.com/varunn12/revbridge",
+    "technicalScores": {
+      "reliability": 70,
+      "latency": 70,
+      "toolUse": 70,
+      "safety": 70,
+      "maintainability": 70,
+      "documentation": 70
+    },
+    "evalSuites": [],
+    "gtm": {
+      "tagline": "",
+      "valueProposition": "Agent imported from varunn12/revbridge",
+      "targetAudience": [
+        "Product teams",
+        "Platform engineers",
+        "GTM leads"
+      ],
+      "useCases": [],
+      "readinessChecklist": [
+        {
+          "item": "Agent manifest published",
+          "completed": false
+        },
+        {
+          "item": "0 action(s) defined",
+          "completed": false
+        },
+        {
+          "item": "Load test verified",
+          "completed": false
+        },
+        {
+          "item": "Product demo video recorded",
+          "completed": false
+        },
+        {
+          "item": "Sales one-pager published",
+          "completed": false
+        },
+        {
+          "item": "Customer case study",
+          "completed": false
+        }
+      ]
+    },
+    "id": "eec1ad92-e2e2-4e9a-b079-57f886fb8da7",
+    "createdAt": "2026-07-01T21:05:43.372Z",
+    "updatedAt": "2026-07-01T21:06:08.603Z"
+  },
+  {
+    "id": "agent-agentstore",
+    "slug": "agentstore",
+    "name": "Agent Store",
+    "description": "Catalog, score, and launch agents across your product portfolio — technical evals, GTM readiness, and builder leaderboards in one hub.",
+    "longDescription": "Agent Store is the central hub for product teams to discover, evaluate, and launch agents. It catalogs agents with search and filters, tracks weighted technical scores (reliability, latency, tool use, safety, maintainability, documentation), monitors eval pass rates per suite, and surfaces GTM readiness checklists. Teams can import agents from GitHub repos, compare portfolios side-by-side, and manage metadata through a dashboard. Built on Next.js 16 with Vercel Blob persistence for production CRUD.",
+    "category": "internal",
+    "status": "beta",
+    "version": "0.1.0",
+    "owner": "Varun Pandey",
+    "team": "FieldAssist",
+    "tags": [
+      "catalog",
+      "gtm",
+      "evals",
+      "scoring",
+      "github-import",
+      "nextjs"
+    ],
+    "icon": "🏪",
+    "repoUrl": "https://github.com/varunn12/Agentstore",
+    "createdAt": "2026-07-02T00:00:00.000Z",
+    "updatedAt": "2026-07-02T00:00:00.000Z",
+    "technicalScores": {
+      "reliability": 78,
+      "latency": 85,
+      "toolUse": 80,
+      "safety": 72,
+      "maintainability": 82,
+      "documentation": 88
+    },
+    "scoreNotes": {
+      "toolUse": "GitHub repo import, REST API for agent CRUD, and Vercel Blob persistence.",
+      "documentation": "Scoring methodology page, agent definition guide, and deploy README.",
+      "safety": "No auth on dashboard yet — team-only access pending."
+    },
+    "evalSuites": [],
+    "gtm": {
+      "tagline": "Discover, evaluate, and launch every agent in your portfolio",
+      "valueProposition": "One place to catalog agents, track technical scores and eval pass rates, monitor GTM readiness, and compare builders — with GitHub import and a team dashboard.",
+      "targetAudience": [
+        "Product teams shipping agents",
+        "Platform engineers",
+        "GTM and launch leads"
+      ],
+      "useCases": [
+        "Catalog all team agents with status and category filters",
+        "Import agent metadata from GitHub repositories",
+        "Compare agents across technical, eval, and GTM dimensions",
+        "Track builder scoreboard by agent owner",
+        "Monitor GTM launch checklists per agent"
+      ],
+      "pricingTier": "Internal",
+      "readinessChecklist": [
+        {
+          "item": "Agent catalog with search and filters",
+          "completed": true
+        },
+        {
+          "item": "Technical scoring and methodology page",
+          "completed": true
+        },
+        {
+          "item": "GitHub repo import",
+          "completed": true
+        },
+        {
+          "item": "Builder scoreboard",
+          "completed": true
+        },
+        {
+          "item": "Vercel Blob production persistence",
+          "completed": true
+        },
+        {
+          "item": "Dashboard auth for team-only access",
+          "completed": false
+        },
+        {
+          "item": "CI-connected eval score updates",
+          "completed": false
+        }
+      ]
+    }
+  }
+]
