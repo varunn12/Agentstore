@@ -72,31 +72,61 @@ function mergePartialTechnicalScores(
   return merged;
 }
 
-function mergeGtmChecklist(existing: GTMInfo, imported: GTMInfo): GTMInfo {
+function syncGtmFromImport(existing: GTMInfo, imported: GTMInfo): GTMInfo {
+  const manualItemNeedles = ["demo video", "one-pager", "case study"];
   const importedByItem = new Map(
     imported.readinessChecklist.map((item) => [item.item, item.completed]),
   );
 
-  const mergedChecklist = existing.readinessChecklist.map((item) => ({
-    ...item,
-    completed:
-      item.completed ||
-      (importedByItem.has(item.item) ? importedByItem.get(item.item)! : false),
-  }));
+  const checklist = existing.readinessChecklist.map((item) => {
+    const isManual = manualItemNeedles.some((needle) =>
+      item.item.toLowerCase().includes(needle),
+    );
+    if (isManual) return item;
+    if (importedByItem.has(item.item)) {
+      return { ...item, completed: importedByItem.get(item.item)! };
+    }
+    return item;
+  });
 
-  const knownItems = new Set(mergedChecklist.map((item) => item.item));
+  const knownItems = new Set(checklist.map((item) => item.item));
   for (const item of imported.readinessChecklist) {
     if (!knownItems.has(item.item)) {
-      mergedChecklist.push(item);
+      checklist.push(item);
     }
   }
 
   return {
     ...existing,
-    readinessChecklist: mergedChecklist,
+    tagline: imported.tagline.trim() ? imported.tagline : existing.tagline,
+    valueProposition: imported.valueProposition || existing.valueProposition,
     useCases:
-      existing.useCases.length > 0 ? existing.useCases : imported.useCases,
-    tagline: existing.tagline.trim() ? existing.tagline : imported.tagline,
+      imported.useCases.length > 0 ? imported.useCases : existing.useCases,
+    readinessChecklist: checklist,
+  };
+}
+
+export async function buildAgentUpdatesFromRepoSync(
+  agent: Agent,
+): Promise<UpdateAgentInput> {
+  if (!agent.repoUrl) {
+    throw new Error(
+      "Sync requires a linked repoUrl. Add the GitHub repo in the dashboard first.",
+    );
+  }
+
+  const imported = await importAgentFromRepo(agent.repoUrl);
+
+  return {
+    name: imported.name,
+    description: imported.description,
+    longDescription: imported.longDescription,
+    version: imported.version,
+    category: imported.category,
+    icon: imported.icon,
+    tags: [...new Set([...imported.tags, ...agent.tags])],
+    technicalScores: imported.technicalScores,
+    gtm: syncGtmFromImport(agent.gtm, imported.gtm),
   };
 }
 
@@ -119,7 +149,7 @@ export async function buildAgentUpdatesFromCIReport(
       agent.technicalScores,
       imported.technicalScores,
     );
-    updates.gtm = mergeGtmChecklist(agent.gtm, imported.gtm);
+    updates.gtm = syncGtmFromImport(agent.gtm, imported.gtm);
 
     if (!agent.longDescription.trim()) {
       updates.longDescription = imported.longDescription;

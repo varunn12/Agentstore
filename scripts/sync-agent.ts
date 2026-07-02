@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { buildAgentUpdatesFromCIReport } from "../src/lib/ci-report";
+import { buildAgentUpdatesFromRepoSync } from "../src/lib/ci-report";
 import { enrichAgent } from "../src/lib/scoring";
 import { getAgentBySlug, updateAgent } from "../src/lib/store";
 
@@ -41,9 +41,7 @@ async function main() {
     process.exit(1);
   }
 
-  const updates = await buildAgentUpdatesFromCIReport(agent, {
-    syncManifest: true,
-  });
+  const updates = await buildAgentUpdatesFromRepoSync(agent);
   const updated = await updateAgent(slug, updates);
   const enriched = enrichAgent(updated);
 

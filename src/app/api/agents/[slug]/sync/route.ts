@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { buildAgentUpdatesFromCIReport } from "@/lib/ci-report";
+import { buildAgentUpdatesFromRepoSync } from "@/lib/ci-report";
 import { enrichAgent } from "@/lib/scoring";
 import { getAgentBySlug, updateAgent } from "@/lib/store";
 
@@ -25,9 +25,7 @@ export async function POST(
   }
 
   try {
-    const updates = await buildAgentUpdatesFromCIReport(agent, {
-      syncManifest: true,
-    });
+    const updates = await buildAgentUpdatesFromRepoSync(agent);
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json(
