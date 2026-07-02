@@ -94,3 +94,19 @@ export type CreateAgentInput = Omit<
 export type UpdateAgentInput = Partial<
   Omit<Agent, "id" | "createdAt" | "updatedAt">
 >;
+
+export interface CIReportMetadata {
+  commitSha?: string;
+  branch?: string;
+  workflowRunUrl?: string;
+  runId?: string;
+}
+
+export interface CIReportInput {
+  evalSuites?: EvalSuite[];
+  technicalScores?: Partial<TechnicalScores>;
+  scoreNotes?: TechnicalScoreNotes;
+  syncManifest?: boolean;
+  version?: string;
+  metadata?: CIReportMetadata;
+}

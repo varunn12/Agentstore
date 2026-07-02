@@ -28,11 +28,13 @@ const RANK_STYLES = [
 export function BuilderScoreboard({
   builders,
   compact = false,
+  layout = "default",
   title = "Top Builders",
   showViewAll = false,
 }: {
   builders: BuilderSummary[];
   compact?: boolean;
+  layout?: "default" | "sidebar";
   title?: string;
   showViewAll?: boolean;
 }) {
@@ -48,12 +50,22 @@ export function BuilderScoreboard({
 
   return (
     <section>
-      <div className="mb-6 flex items-center justify-between">
+      <div
+        className={cn(
+          "mb-4 flex items-center justify-between gap-2",
+          layout === "sidebar" && "flex-col items-stretch",
+        )}
+      >
         <div>
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+          <h2
+            className={cn(
+              "font-semibold text-zinc-900 dark:text-zinc-50",
+              layout === "sidebar" ? "text-base" : "text-xl",
+            )}
+          >
             {title}
           </h2>
-          {!compact && (
+          {!compact && layout !== "sidebar" && (
             <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
               Ranked by portfolio score — average technical, eval, and GTM
               performance across each builder&apos;s agents.
@@ -65,19 +77,29 @@ export function BuilderScoreboard({
             href="/builders"
             className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
           >
-            View scoreboard
+            View all
             <ArrowRight className="h-4 w-4" />
           </Link>
         )}
       </div>
 
-      <div className={cn("grid gap-4", compact ? "lg:grid-cols-3" : "gap-6")}>
+      <div
+        className={cn(
+          "grid gap-4",
+          layout === "sidebar"
+            ? "grid-cols-1"
+            : compact
+              ? "lg:grid-cols-3"
+              : "gap-6",
+        )}
+      >
         {builders.map((builder, index) => (
           <BuilderCard
             key={builder.owner}
             builder={builder}
             rank={index + 1}
-            compact={compact}
+            compact={compact || layout === "sidebar"}
+            sidebar={layout === "sidebar"}
           />
         ))}
       </div>
@@ -89,14 +111,54 @@ function BuilderCard({
   builder,
   rank,
   compact,
+  sidebar = false,
 }: {
   builder: BuilderSummary;
   rank: number;
   compact: boolean;
+  sidebar?: boolean;
 }) {
   const grade = getScoreGrade(builder.overallScore);
   const rankStyle = RANK_STYLES[rank - 1];
   const RankIcon = rankStyle?.icon;
+
+  if (sidebar) {
+    return (
+      <Card className={cn(rankStyle && "ring-2", rankStyle?.ring)}>
+        <CardContent className="flex items-center gap-3 py-4">
+          <div className="relative shrink-0">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+              {getBuilderInitials(builder.owner)}
+            </div>
+            {rank <= 3 && RankIcon && (
+              <span
+                className={cn(
+                  "absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full",
+                  rankStyle.badge,
+                )}
+              >
+                <RankIcon className="h-2.5 w-2.5" />
+              </span>
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+              {builder.owner}
+            </p>
+            <p className="text-xs text-zinc-500">
+              {builder.agentCount} agent{builder.agentCount === 1 ? "" : "s"}
+            </p>
+          </div>
+          <div className="shrink-0 text-right">
+            <p className={cn("text-lg font-bold leading-none", grade.color)}>
+              {builder.overallScore}
+            </p>
+            <p className="text-[10px] text-zinc-500">{grade.grade}</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className={cn(rankStyle && "ring-2", rankStyle?.ring)}>

@@ -273,7 +273,9 @@ function inferIcon(name: string, description: string): string {
   return "🤖";
 }
 
-function defaultScores(manifest: AgentManifest | null): TechnicalScores {
+export function inferTechnicalScoresFromManifest(
+  manifest: AgentManifest | null,
+): TechnicalScores {
   const scores: TechnicalScores = {
     reliability: 70,
     latency: 70,
@@ -427,7 +429,7 @@ export async function importAgentFromRepo(
     tags,
     icon: inferIcon(name, description),
     repoUrl,
-    technicalScores: defaultScores(manifest),
+    technicalScores: inferTechnicalScoresFromManifest(manifest),
     evalSuites: [],
     gtm: buildGtm(manifest, description, useCases),
   };

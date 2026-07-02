@@ -1,0 +1,47 @@
+{
+  "version": "0.1.0",
+  "technicalScores": {
+    "reliability": 88,
+    "latency": 92
+  },
+  "scoreNotes": {
+    "latency": "CI load test: P95 42ms at 30 rps (run ${{ github.run_id }})"
+  },
+  "evalSuites": [
+    {
+      "id": "suite-contract",
+      "name": "Agent Contract Tests",
+      "description": "Manifest, API, and MCP contract conformance",
+      "lastRunAt": "2026-07-02T12:00:00.000Z",
+      "passRate": 100,
+      "totalCases": 3,
+      "passedCases": 3,
+      "cases": [
+        {
+          "id": "c1",
+          "name": "Manifest schema validation",
+          "description": "agent.manifest.json matches published contract",
+          "category": "contract",
+          "passed": true,
+          "score": 100
+        },
+        {
+          "id": "c2",
+          "name": "MCP tools discovery",
+          "description": "GET /mcp/tools returns expected tools",
+          "category": "contract",
+          "passed": true,
+          "score": 100
+        },
+        {
+          "id": "c3",
+          "name": "A2A agent card",
+          "description": "GET /.well-known/agent-card.json is valid",
+          "category": "contract",
+          "passed": true,
+          "score": 100
+        }
+      ]
+    }
+  ]
+}

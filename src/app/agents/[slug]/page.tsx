@@ -8,6 +8,7 @@ import { TechScoreChart } from "@/components/agents/tech-score-chart";
 import { EvalResultsTable } from "@/components/agents/eval-results-table";
 import { GTMReadiness } from "@/components/agents/gtm-readiness";
 import { OwnerRecommendations } from "@/components/agents/owner-recommendations";
+import { SyncFromGitHubButton } from "@/components/agents/sync-from-github-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CATEGORY_LABELS, formatDate } from "@/lib/utils";
@@ -90,6 +91,18 @@ export default async function AgentDetailPage({
           )}
         </div>
 
+        {agent.repoUrl && (
+          <div className="mb-8 flex flex-wrap items-start justify-between gap-4 rounded-xl border border-zinc-200 bg-zinc-50/80 px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900/40">
+            <SyncFromGitHubButton slug={agent.slug} repoUrl={agent.repoUrl} />
+            <Link
+              href={`/dashboard/agents/${agent.slug}/edit`}
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+            >
+              Edit scores & evals in Dashboard →
+            </Link>
+          </div>
+        )}
+
         <section className="mb-8">
           <OwnerRecommendations
             agent={agent}
@@ -124,14 +137,16 @@ export default async function AgentDetailPage({
           <EvalResultsTable suites={agent.evalSuites} />
         </section>
 
-        <div className="mt-8 text-center">
-          <Link
-            href={`/dashboard/agents/${agent.slug}/edit`}
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
-          >
-            Edit scores & evals in Dashboard →
-          </Link>
-        </div>
+        {!agent.repoUrl && (
+          <div className="mt-8 text-center">
+            <Link
+              href={`/dashboard/agents/${agent.slug}/edit`}
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+            >
+              Edit scores & evals in Dashboard →
+            </Link>
+          </div>
+        )}
       </main>
     </>
   );

@@ -49,8 +49,59 @@ In Vercel → **Settings** → **Environment Variables**, add:
 |----------|---------|
 | `GITHUB_CLASSIC_TOKEN` | Import private GitHub repos (classic PAT with `repo` scope) |
 | `GITHUB_TOKEN` | Fine-grained PAT alternative for repo import |
+| `AGENTSTORE_API_KEY` | Secret for CI to POST eval results to `/api/agents/[slug]/ci` |
 
 See `.env.example` for local development.
+
+## CI integration
+
+Agent Store can receive eval results and manifest updates from GitHub Actions on every push.
+
+### 1. Configure Agent Store
+
+Set `AGENTSTORE_API_KEY` in `.env.local` (local) or Vercel environment variables (production). Use a long random string.
+
+### 2. Add the workflow to your agent repo
+
+Copy `templates/github-actions/agentstore-report.yml` to `.github/workflows/agentstore-report.yml` in the agent repository.
+
+Add GitHub Actions secrets:
+
+| Secret | Value |
+|--------|-------|
+| `AGENTSTORE_URL` | Your deployed Agent Store URL (e.g. `https://agentstore.vercel.app`) |
+| `AGENTSTORE_API_KEY` | Same value as `AGENTSTORE_API_KEY` on Agent Store |
+| `AGENTSTORE_SLUG` | The agent's catalog slug (e.g. `agent-ars`) |
+
+### 3. Produce eval results (optional)
+
+After your test step, write `eval-results.json` at the repo root. See `templates/eval-results.example.json` for the format.
+
+If the file is missing, the workflow still runs `syncManifest: true`, which re-reads `agent.manifest.json` from GitHub and updates technical scores and GTM checklist items.
+
+### 4. API reference
+
+```bash
+curl -X POST "$AGENTSTORE_URL/api/agents/$SLUG/ci" \
+  -H "Authorization: Bearer $AGENTSTORE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "syncManifest": true,
+    "evalSuites": [{ "id": "suite-contract", "name": "Contract Tests", ... }],
+    "technicalScores": { "latency": 92 },
+    "metadata": { "commitSha": "abc123", "branch": "main" }
+  }'
+```
+
+Local testing:
+
+```bash
+chmod +x scripts/report-to-agentstore.sh
+AGENTSTORE_URL=http://localhost:3000 \
+AGENTSTORE_API_KEY=your-secret \
+AGENTSTORE_SLUG=agent-ars \
+./scripts/report-to-agentstore.sh templates/eval-results.example.json
+```
 
 ## Getting Started
 
@@ -105,10 +156,11 @@ data/
 | GET    | `/api/agents/[slug]`  | Get agent       |
 | PUT    | `/api/agents/[slug]`  | Update agent    |
 | DELETE | `/api/agents/[slug]`  | Delete agent    |
+| POST   | `/api/agents/[slug]/sync` | Re-sync from linked GitHub repo (manifest + README) |
+| POST   | `/api/agents/[slug]/ci` | CI report — eval suites, scores, manifest sync (`Authorization: Bearer`) |
 
 ## Next Steps
 
-- Connect eval runners to CI for automated score updates
 - Add auth for team-only dashboard access
 - Migrate `data/agents.json` to a database (Postgres, Supabase)
 - Import agents from Cursor agent configs or MCP manifests

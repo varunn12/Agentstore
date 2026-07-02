@@ -153,7 +153,7 @@
     "icon": "🔍",
     "repoUrl": "https://github.com/wandering-green/dedup",
     "createdAt": "2026-06-01T00:00:00.000Z",
-    "updatedAt": "2026-07-02T00:00:00.000Z",
+    "updatedAt": "2026-07-01T22:27:10.526Z",
     "technicalScores": {
       "reliability": 82,
       "latency": 75,
@@ -279,6 +279,14 @@
         {
           "item": "Customer case study",
           "completed": false
+        },
+        {
+          "item": "1 action(s) defined",
+          "completed": true
+        },
+        {
+          "item": "Sales one-pager published",
+          "completed": false
         }
       ]
     }
@@ -345,7 +353,7 @@
     },
     "id": "3a7de9ca-918c-4032-aa3a-cfc9d3cf67d6",
     "createdAt": "2026-07-01T20:00:04.809Z",
-    "updatedAt": "2026-07-01T20:00:04.809Z"
+    "updatedAt": "2026-07-01T22:27:20.509Z"
   },
   {
     "id": "7282f2f1-5cfc-4e11-916d-fc260ceb53e2",
@@ -566,5 +574,77 @@
         }
       ]
     }
+  },
+  {
+    "slug": "momentum",
+    "name": "Momentum",
+    "description": "Sales execution dashboard with Zoho CRM sync, AOP scorecards, and Weekly Pulse pipeline reviews.",
+    "longDescription": "Momentum is a sales execution dashboard built on Next.js + Prisma. It combines Zoho CRM deal sync, AOP tracking, Weekly Pulse reviews, and controlled Google-auth access for sales, managers, and admins. - AOP scorecard with org/cohort/rep drill-down - Weekly Pulse with pipeline health, wins/losses, stalled deals, and review notes - Zoho deal sync (incremental and full)",
+    "category": "sales",
+    "status": "draft",
+    "version": "0.1.0",
+    "owner": "varunn12",
+    "team": "varunn12",
+    "tags": [
+      "sales",
+      "zoho",
+      "dashboard",
+      "nextjs",
+      "github"
+    ],
+    "icon": "📈",
+    "repoUrl": "https://github.com/varunn12/momentum",
+    "technicalScores": {
+      "reliability": 70,
+      "latency": 70,
+      "toolUse": 70,
+      "safety": 70,
+      "maintainability": 70,
+      "documentation": 70
+    },
+    "evalSuites": [],
+    "gtm": {
+      "tagline": "Run sales execution with AOP scorecards and weekly pipeline pulse",
+      "valueProposition": "Unify Zoho CRM deal sync, annual operating plan tracking, and Weekly Pulse reviews in one dashboard for reps, managers, and admins.",
+      "targetAudience": [
+        "Sales reps and account executives",
+        "Sales managers and leadership",
+        "Sales operations teams"
+      ],
+      "useCases": [
+        "AOP scorecard with org, cohort, and rep drill-down",
+        "Weekly Pulse with pipeline health, wins/losses, and stalled deals",
+        "Incremental and full Zoho CRM deal sync"
+      ],
+      "readinessChecklist": [
+        {
+          "item": "Agent manifest published",
+          "completed": false
+        },
+        {
+          "item": "0 action(s) defined",
+          "completed": false
+        },
+        {
+          "item": "Load test verified",
+          "completed": false
+        },
+        {
+          "item": "Product demo video recorded",
+          "completed": false
+        },
+        {
+          "item": "Sales one-pager published",
+          "completed": false
+        },
+        {
+          "item": "Customer case study",
+          "completed": false
+        }
+      ]
+    },
+    "id": "72d0848a-462d-4ee0-8e31-296ea08021ce",
+    "createdAt": "2026-07-02T20:49:44.542Z",
+    "updatedAt": "2026-07-02T20:49:44.542Z"
   }
 ]

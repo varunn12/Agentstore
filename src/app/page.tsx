@@ -5,7 +5,9 @@ import { BuilderScoreboard } from "@/components/builders/builder-scoreboard";
 import { getAllAgentsEnriched, getStoreStats } from "@/lib/store";
 import { getTopBuilders } from "@/lib/builder-scoring";
 import { AGENT_DEFINITION } from "@/lib/agent-definition";
+import { STORE_DEFINITION } from "@/lib/store-definition";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bot, Rocket, Gauge, CheckCircle, Plus, ArrowRight } from "lucide-react";
 
@@ -24,17 +26,36 @@ export default async function HomePage() {
           <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 sm:text-4xl">
             Agent Store
           </h1>
-          <p className="mt-2 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
-            Discover, evaluate, and launch agents across your product portfolio.
-            Track technical scores, eval pass rates, and GTM readiness in one place.
+          <p className="mt-2 text-lg font-medium text-indigo-600 dark:text-indigo-400">
+            {STORE_DEFINITION.tagline}
           </p>
-          <Link
-            href="/what-is-an-agent"
-            className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
-          >
-            {AGENT_DEFINITION.title}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <p className="mt-3 max-w-3xl text-lg text-zinc-600 dark:text-zinc-400">
+            {STORE_DEFINITION.summary} Discover, evaluate, and launch agents with
+            technical scores, eval pass rates, and GTM readiness in one place.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {STORE_DEFINITION.domains.map((domain) => (
+              <Badge key={domain.id} variant="outline">
+                {domain.acronym} — {domain.title}
+              </Badge>
+            ))}
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            <Link
+              href="/about"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+            >
+              About Agent Store
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/what-is-an-agent"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-300"
+            >
+              {AGENT_DEFINITION.title}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </section>
 
         <section className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -60,27 +81,29 @@ export default async function HomePage() {
           />
         </section>
 
-        <section className="mb-10">
-          <BuilderScoreboard
-            builders={topBuilders}
-            compact
-            showViewAll
-          />
-        </section>
-
-        <section>
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-              Agent Catalog
-            </h2>
-            <Link href="/agents/add">
-              <Button variant="secondary" size="sm">
-                <Plus className="h-4 w-4" /> Add from GitHub
-              </Button>
-            </Link>
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,4fr)_minmax(0,1fr)] lg:items-start">
+          <div className="min-w-0">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+                Agent Catalog
+              </h2>
+              <Link href="/agents/add">
+                <Button variant="secondary" size="sm">
+                  <Plus className="h-4 w-4" /> Add from GitHub
+                </Button>
+              </Link>
+            </div>
+            <AgentCatalog agents={agents} gridClassName="sm:grid-cols-2 xl:grid-cols-2" />
           </div>
-          <AgentCatalog agents={agents} />
-        </section>
+
+          <aside className="min-w-0 lg:sticky lg:top-24">
+            <BuilderScoreboard
+              builders={topBuilders}
+              layout="sidebar"
+              showViewAll
+            />
+          </aside>
+        </div>
       </main>
     </>
   );

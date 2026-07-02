@@ -4,9 +4,16 @@ import { useMemo, useState } from "react";
 import type { AgentSummary, AgentCategory, AgentStatus } from "@/lib/types";
 import { AgentCard } from "@/components/agents/agent-card";
 import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
 
-export function AgentCatalog({ agents }: { agents: AgentSummary[] }) {
+export function AgentCatalog({
+  agents,
+  gridClassName = "sm:grid-cols-2 lg:grid-cols-3",
+}: {
+  agents: AgentSummary[];
+  gridClassName?: string;
+}) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<AgentCategory | "all">("all");
   const [status, setStatus] = useState<AgentStatus | "all">("all");
@@ -66,7 +73,7 @@ export function AgentCatalog({ agents }: { agents: AgentSummary[] }) {
       {filtered.length === 0 ? (
         <p className="py-12 text-center text-zinc-500">No agents match your filters.</p>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={cn("grid gap-6", gridClassName)}>
           {filtered.map((agent) => (
             <AgentCard key={agent.id} agent={agent} />
           ))}

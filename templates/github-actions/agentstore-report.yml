@@ -1,0 +1,90 @@
+# Copy to your agent repo as `.github/workflows/agentstore-report.yml`
+#
+# Required GitHub secrets (Settings → Secrets and variables → Actions):
+#   AGENTSTORE_URL      — e.g. https://your-agentstore.vercel.app
+#   AGENTSTORE_API_KEY  — same value as AGENTSTORE_API_KEY on Agent Store
+#   AGENTSTORE_SLUG     — catalog slug, e.g. agent-ars
+
+name: Report to Agent Store
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # --- Add your eval/test steps here ---
+      # Example:
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 22
+      # - run: npm ci && npm test
+      #
+      # Your test runner should produce eval-results.json (see templates/eval-results.example.json)
+      # or generate it in a prior step.
+
+      - name: Report to Agent Store
+        env:
+          AGENTSTORE_URL: ${{ secrets.AGENTSTORE_URL }}
+          AGENTSTORE_API_KEY: ${{ secrets.AGENTSTORE_API_KEY }}
+          AGENTSTORE_SLUG: ${{ secrets.AGENTSTORE_SLUG }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${AGENTSTORE_URL:-}" ] || [ -z "${AGENTSTORE_API_KEY:-}" ] || [ -z "${AGENTSTORE_SLUG:-}" ]; then
+            echo "Skipping: AGENTSTORE_URL, AGENTSTORE_API_KEY, or AGENTSTORE_SLUG not configured."
+            exit 0
+          fi
+
+          PAYLOAD_FILE="$(mktemp)"
+
+          if [ -f eval-results.json ]; then
+            jq -n \
+              --argfile evals eval-results.json \
+              --arg commit "${{ github.sha }}" \
+              --arg branch "${{ github.ref_name }}" \
+              --arg runUrl "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+              '{
+                evalSuites: $evals.evalSuites,
+                technicalScores: ($evals.technicalScores // null),
+                scoreNotes: ($evals.scoreNotes // null),
+                version: ($evals.version // null),
+                syncManifest: true,
+                metadata: {
+                  commitSha: $commit,
+                  branch: $branch,
+                  workflowRunUrl: $runUrl,
+                  runId: "${{ github.run_id }}"
+                }
+              } | with_entries(select(.value != null))' > "$PAYLOAD_FILE"
+          else
+            jq -n \
+              --arg commit "${{ github.sha }}" \
+              --arg branch "${{ github.ref_name }}" \
+              --arg runUrl "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+              '{
+                syncManifest: true,
+                metadata: {
+                  commitSha: $commit,
+                  branch: $branch,
+                  workflowRunUrl: $runUrl,
+                  runId: "${{ github.run_id }}"
+                }
+              }' > "$PAYLOAD_FILE"
+          fi
+
+          echo "Posting CI report to ${AGENTSTORE_URL}/api/agents/${AGENTSTORE_SLUG}/ci"
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${AGENTSTORE_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d @"$PAYLOAD_FILE" \
+            "${AGENTSTORE_URL%/}/api/agents/${AGENTSTORE_SLUG}/ci"
+
+          echo ""
+          echo "Agent Store updated successfully."
