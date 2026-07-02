@@ -3,14 +3,17 @@
     "id": "agent-ars",
     "slug": "agent-ars",
     "name": "ARS — Auto Replenishment",
-    "description": "Distributor replenishment agent for CPG-OS: ideal-order recommendation, modification review, fund coverage, and ERP push.",
-    "longDescription": "ARS 2.0 is the Auto-Replenishment agent under FieldAssist CPG-OS. It exposes ~12 typed actions through CLI, API, UI, and MCP surfaces. Domain modules are wired through 7 pluggable strategy interfaces (Forecast, Quantity, Allocation, Approval, Scheduling, Lifecycle, Truncation). Built on .NET 9 (engine/API/CLI/MCP), Python 3.12 (ML forecasting), and Nuxt 4 (console UI).",
+    "description": "Distributor replenishment agent under CPG-OS: ideal-order recommendation, modification review, fund coverage, truncation, CP-WH allocation, ERP push, demand feedback, MTMP, bullwhip detection, ground-truth reconciliation, SKU-fitness classification, and smoothing-parameter tuning",
+    "longDescription": "**ARS 2.0** — the Auto-Replenishment agent under the FieldAssist **CPG-OS**. One agent, ~12 typed actions, exposed through Anuj's normalized contract (CLI · API · UI · MCP), headless from commit one. > Strategic context: `CPG_OS_Strategy.md` · Engineering bible: `CPG OS Doc_Anuj.docx` · Product design: `ARS_2.0_Product_Design.md` (all in the sibling `day1_kit` working set). ARS is a black box to the master CPG-OS agent: it reads the manifest at `/.well-known/agent.json`, POSTs an `ActionRequest` to `/v1/runs`, and receives a `RunResult`. Internally, ARS is domain modules wired through **7 plug",
     "category": "ops",
     "status": "draft",
     "version": "0.1.0",
     "owner": "Kumar Prakarsh",
     "team": "ARS Squad",
     "tags": [
+      "tier-S",
+      "ars",
+      "github",
       "cpg",
       "replenishment",
       "forecasting",
@@ -21,14 +24,14 @@
     "icon": "📦",
     "repoUrl": "https://github.com/kumarprakarsh/agent-ars",
     "createdAt": "2026-06-15T00:00:00.000Z",
-    "updatedAt": "2026-07-02T00:00:00.000Z",
+    "updatedAt": "2026-07-02T21:03:35.460Z",
     "technicalScores": {
       "reliability": 85,
-      "latency": 95,
+      "latency": 90,
       "toolUse": 92,
-      "safety": 88,
-      "maintainability": 84,
-      "documentation": 80
+      "safety": 70,
+      "maintainability": 70,
+      "documentation": 70
     },
     "scoreNotes": {
       "latency": "Tier-S load test passed at 30 rps with P95 37ms on recommend_replenishment.",
@@ -87,19 +90,20 @@
       }
     ],
     "gtm": {
-      "tagline": "Automate distributor replenishment with auditable, strategy-pluggable intelligence",
-      "valueProposition": "Generate ideal orders, validate distributor modifications, check fund coverage, and push to ERP — all through a normalized CLI · API · UI · MCP contract under CPG-OS.",
+      "tagline": "ARS — Auto Replenishment for programmatic CPG operations",
+      "valueProposition": "Distributor replenishment agent under CPG-OS: ideal-order recommendation, modification review, fund coverage, truncation, CP-WH allocation, ERP push, demand feedback, MTMP, bullwhip detection, ground-truth reconciliation, SKU-fitness classification, and smoothing-parameter tuning.",
       "targetAudience": [
         "CPG brand supply chain teams",
         "Distributor operations",
         "FieldAssist platform teams"
       ],
       "useCases": [
-        "Ideal order recommendation",
-        "Distributor modification review & escalation",
-        "Fund coverage evaluation",
-        "CP-WH stock allocation",
-        "SKU fitness classification & forecast tuning"
+        "Generate the Ideal Order for a distributor for a date.",
+        "Validate distributor/FBAM/CSNL order modifications, check per-line tolerance server-side, transition the order state (IO→PACO within tolerance | IO→ESCALATED on breach, consulting the tenant ApprovalStrategy | IO→ACO on auto-freeze), and capture multi-role feedback (F-EVAL-CAPTURE foundation, capture-only — no aggregation or retraining).",
+        "Check a distributor's available fund/credit (read via the per-tenant fund/credit adapter — default = ARS-owned fund_balance; concrete SAP/DMS binding deferred) against the order (ACO) value. Computes coverage_pct = available/required*100, flags threshold_breached when coverage < fund_threshold_pct (default 90), and recommends proceed (not breached) | trigger_exception_wf2_then_truncate (breached). Sync, read-only beyond the fund_check_log audit row, reversible. Currency-strict: the fund-source currency must equal the order currency (no implicit FX).",
+        "Apply truncation strategy when funds are insufficient, respecting MOQ + case rounding.",
+        "Allocate CP-WH ATP across competing distributor demand.",
+        "Push a SOCO to the tenant ERP via the outbound adapter."
       ],
       "pricingTier": "TBD",
       "readinessChecklist": [
@@ -126,6 +130,18 @@
         {
           "item": "Customer case study",
           "completed": false
+        },
+        {
+          "item": "Agent manifest published",
+          "completed": true
+        },
+        {
+          "item": "12 action(s) defined",
+          "completed": true
+        },
+        {
+          "item": "Load test verified",
+          "completed": true
         }
       ]
     }
@@ -134,14 +150,17 @@
     "id": "agent-dedup",
     "slug": "dedup",
     "name": "Outlet Dedupe",
-    "description": "Detects duplicate CPG outlet records using storefront-photo similarity, geo, phone, GSTIN, and reviewable evidence.",
-    "longDescription": "Headless outlet-deduplication agent for CPG field-sales teams. Tier M foundation with API + UI + CLI + MCP over one Python application/core layer. Finds duplicate or low-quality outlet records, explains the evidence, and prepares safe recommendations to retire duplicates or recapture poor photos. Works standalone or as a CPG-OS action agent.",
+    "description": "Detects duplicate CPG outlet records using storefront-photo similarity and geometry, multilingual names, geo, phone, GSTIN, optional signboard OCR / vision adjudication, and reviewable evidence.",
+    "longDescription": "Headless outlet-deduplication agent for CPG field-sales teams. It detects duplicate outlet records using storefront-photo similarity and geometry, multilingual names, geo, phone, GSTIN, optional signboard OCR / vision adjudication, and reviewable evidence. This repo is a handover-grade Tier M foundation: API + UI + CLI + MCP-style tools over one Python application/core layer. It is not a finished production Azure deployment. For the target product definition across standalone deployment, CPG-OS action-agent usage, API, CLI, MCP, A2A, and FA integration boundaries, read [docs/PRODUCT_GOAL.md](d",
     "category": "ops",
     "status": "beta",
     "version": "0.1.0",
     "owner": "FieldAssist Product",
     "team": "fieldassist-product",
     "tags": [
+      "tier-M",
+      "outlet-dedupe",
+      "github",
       "cpg",
       "deduplication",
       "outlet",
@@ -153,14 +172,14 @@
     "icon": "🔍",
     "repoUrl": "https://github.com/wandering-green/dedup",
     "createdAt": "2026-06-01T00:00:00.000Z",
-    "updatedAt": "2026-07-01T22:27:10.526Z",
+    "updatedAt": "2026-07-02T21:03:36.292Z",
     "technicalScores": {
-      "reliability": 82,
-      "latency": 75,
-      "toolUse": 90,
-      "safety": 92,
-      "maintainability": 86,
-      "documentation": 88
+      "reliability": 70,
+      "latency": 70,
+      "toolUse": 70,
+      "safety": 70,
+      "maintainability": 80,
+      "documentation": 70
     },
     "scoreNotes": {
       "latency": "Photo similarity and VLM corroboration add latency; load test not yet verified.",
@@ -240,19 +259,15 @@
       }
     ],
     "gtm": {
-      "tagline": "Clean outlet master data with photo-grounded duplicate detection",
-      "valueProposition": "Find duplicate or low-quality outlet records, explain the evidence, and prepare safe retire-or-recapture recommendations — via UI, API, CLI, MCP, or CPG-OS orchestration.",
+      "tagline": "Outlet Dedupe for programmatic CPG operations",
+      "valueProposition": "Detects duplicate CPG outlet records using storefront-photo similarity and geometry, multilingual names, geo, phone, GSTIN, optional signboard OCR / vision adjudication, and reviewable evidence.",
       "targetAudience": [
         "CPG sales-ops and audit teams",
         "Field sales operations",
         "CPG-OS platform integrators"
       ],
       "useCases": [
-        "Duplicate outlet detection across photo, geo, and metadata signals",
-        "Human-in-the-loop retirement recommendations",
-        "Standalone outlet-master cleanup platform",
-        "CPG-OS action agent for outlet-quality signals",
-        "FA outlet master live deduplication"
+        "Run multi-signal outlet deduplication on an uploaded file, a staged file, or outlets fetched live from the FieldAssist outlet master (source_type=fa_outlet_master, company-scoped)."
       ],
       "pricingTier": "TBD",
       "readinessChecklist": [
@@ -295,7 +310,7 @@
     "slug": "micromarket",
     "name": "Micromarket",
     "description": "FieldAssist Micromarket / Location Intelligence platform.",
-    "longDescription": "React, Vite, and Node.js application for micromarket and geospatial analysis. The app serves a built frontend and Express API from one container. - Frontend: React, TypeScript, Vite - Backend: Node.js, Express, TypeScript via `tsx` - Runtime port: `3001`",
+    "longDescription": "Agentic location-intelligence platform for retail micromarket sizing, outlet discovery, verification, and catalog reconciliation. A conversational entry point routes requests through a reasoning orchestrator and an Anthropic Opus planner, which dispatch a shared tool runtime (Google Places / Vision, Gemini, geospatial",
     "category": "internal",
     "status": "draft",
     "version": "0.1.0",
@@ -353,15 +368,15 @@
     },
     "id": "3a7de9ca-918c-4032-aa3a-cfc9d3cf67d6",
     "createdAt": "2026-07-01T20:00:04.809Z",
-    "updatedAt": "2026-07-01T22:27:20.509Z"
+    "updatedAt": "2026-07-02T21:03:40.178Z"
   },
   {
     "id": "7282f2f1-5cfc-4e11-916d-fc260ceb53e2",
     "slug": "perfect-store-cpgos",
-    "name": "Perfect Store",
+    "name": "Perfect Store Cpgos",
     "description": "Depth-specialist agent for CPG-OS that validates Perfect Store KPI anomalies with deterministic evidence and authors reversible, HITL-gated Plugs for FA rule/focus area deployment. Diagnoses 21 diagnosable KPIs (Sales, Coverage, Discipline, MT, Campaign, Supply Chain) against con",
     "longDescription": "Depth-specialist agent for **CPG-OS** that validates Perfect Store KPI anomalies with deterministic evidence and authors reversible, HITL-gated Plugs for FieldAssist rule/focus area deployment. The CPG-OS supervisor senses anomalies and hands hypotheses to this agent. This agent validates them against 21 diagnosable KPIs using deterministic math, returns a verdict (`confirm | refute | inconclusive`) with typed outputs (`Observation | Diagnosis | Opportunity | Plug`), and — on approval — executes the Plug against FA tables. **One agent, one job:** validate Perfect Store KPI hypotheses and autho",
-    "category": "ops",
+    "category": "sales",
     "status": "draft",
     "version": "0.1.0",
     "owner": "rajsinghaipm",
@@ -371,13 +386,13 @@
       "perfect-store-agent",
       "github"
     ],
-    "icon": "📦",
+    "icon": "📈",
     "repoUrl": "https://github.com/rajsinghaipm/perfect-store-cpgos",
     "createdAt": "2026-07-01T20:57:02.743Z",
-    "updatedAt": "2026-07-01T20:57:02.745Z",
+    "updatedAt": "2026-07-02T21:03:40.984Z",
     "technicalScores": {
-      "reliability": 70,
-      "latency": 70,
+      "reliability": 85,
+      "latency": 90,
       "toolUse": 82,
       "safety": 70,
       "maintainability": 70,
@@ -409,7 +424,7 @@
         },
         {
           "item": "Load test verified",
-          "completed": false
+          "completed": true
         },
         {
           "item": "Product demo video recorded",
@@ -429,14 +444,15 @@
   {
     "slug": "revbridge",
     "name": "Revbridge",
-    "description": "Agent imported from varunn12/revbridge",
-    "longDescription": "Agent imported from varunn12/revbridge",
+    "description": "Internal AI assistant for FieldAssist revenue operations: contract ARR/MRR analytics, billing & collections, staged write proposals with human Apply confirmation, and portfolio diagnostics.",
+    "longDescription": "Internal AI assistant for FieldAssist revenue operations: contract ARR/MRR analytics, billing & collections, staged write proposals with human Apply confirmation, and portfolio diagnostics.",
     "category": "internal",
     "status": "draft",
     "version": "0.1.0",
     "owner": "varunn12",
     "team": "varunn12",
     "tags": [
+      "tier-production",
       "github"
     ],
     "icon": "🤖",
@@ -444,7 +460,7 @@
     "technicalScores": {
       "reliability": 70,
       "latency": 70,
-      "toolUse": 70,
+      "toolUse": 92,
       "safety": 70,
       "maintainability": 70,
       "documentation": 70
@@ -452,17 +468,24 @@
     "evalSuites": [],
     "gtm": {
       "tagline": "",
-      "valueProposition": "Agent imported from varunn12/revbridge",
+      "valueProposition": "Internal AI assistant for FieldAssist revenue operations: contract ARR/MRR analytics, billing & collections, staged write proposals with human Apply confirmation, and portfolio diagnostics.",
       "targetAudience": [
         "Product teams",
         "Platform engineers",
         "GTM leads"
       ],
-      "useCases": [],
+      "useCases": [
+        "Return the headline KPIs for the contracts module. ARR has two stakeholder views: External / Investor CARR + Live ARR (include lines flagged internal_churn — what's on paper) and Internal / Practical CARR + Live ARR (exclude flagged lines). MRR is single-valued — Live MRR always excludes internal_churn lines (same number for every stakeholder). Also returns the CARR→Live ARR bridge waterfall, segment / bucket / family / pricing-model / currency rollups, top clients, and data-quality flags. Use t",
+        "ONE-SHOT client lookup: fuzzy-search by name/acronym (same intelligence as find_accounts) then return the full explain_account breakdown (CARR, Live ARR, bucket breakdown, top lines, inclusion flags). PREFER this over find_accounts + explain_account when the user asks for a client's CARR/Live ARR or why a client appears/doesn't appear in a view. Pass account_id if already known. Returns ambiguous=true with candidates when multiple equal matches — ask user to pick.",
+        "ONE-SHOT parent-group lookup: find a group by name/slug and return member accounts with per-member CARR/Live ARR plus group totals. Use for 'Haldiram Group snapshot', 'show Mars roll-up', etc.",
+        "Grouped portfolio analytics — like aggregate_lines but supports group_by account or group (parent org), and metrics carr / live_arr / live_mrr / count. exclude_internal_churn defaults true for live_arr and live_mrr. Use for 'top clients by Live ARR', 'CARR by family', 'ARR by segment'.",
+        "Fuzzy-search accounts (clients) by legal name, with four strategies tried in parallel: (1) substring match, (2) spacing/suffix-insensitive normalized match (so 'Coca Cola' matches 'CocaCola', 'ABC Pvt Ltd' matches 'ABC'), (3) acronym match when the query looks like an initialism — 'HCCB' matches 'Hindustan CocaCola Beverages', 'TCS' matches 'Tata Consultancy Services' — and (4) parent-group name match (so 'Coca-Cola' returns every account in the Coca-Cola group). Results carry a `match_type` fie",
+        "List contract lines with optional filters. Returns at most 100 rows. Each row already includes contracted ARR, live ARR, MRR, bridge bucket, and review flag."
+      ],
       "readinessChecklist": [
         {
           "item": "Agent manifest published",
-          "completed": false
+          "completed": true
         },
         {
           "item": "0 action(s) defined",
@@ -483,25 +506,30 @@
         {
           "item": "Customer case study",
           "completed": false
+        },
+        {
+          "item": "36 action(s) defined",
+          "completed": true
         }
       ]
     },
     "id": "eec1ad92-e2e2-4e9a-b079-57f886fb8da7",
     "createdAt": "2026-07-01T21:05:43.372Z",
-    "updatedAt": "2026-07-01T21:06:08.603Z"
+    "updatedAt": "2026-07-02T21:03:43.706Z"
   },
   {
     "id": "agent-agentstore",
     "slug": "agentstore",
-    "name": "Agent Store",
-    "description": "Catalog, score, and launch agents across your product portfolio — technical evals, GTM readiness, and builder leaderboards in one hub.",
-    "longDescription": "Agent Store is the central hub for product teams to discover, evaluate, and launch agents. It catalogs agents with search and filters, tracks weighted technical scores (reliability, latency, tool use, safety, maintainability, documentation), monitors eval pass rates per suite, and surfaces GTM readiness checklists. Teams can import agents from GitHub repos, compare portfolios side-by-side, and manage metadata through a dashboard. Built on Next.js 16 with Vercel Blob persistence for production CRUD.",
+    "name": "Agentstore",
+    "description": "Central hub to catalog, score, and launch agents — technical evals, GTM readiness, and builder leaderboards.",
+    "longDescription": "A central hub for your product team's agents — catalog them for GTM, track technical scores, run evals, and monitor launch readiness. - **Agent Catalog** — Browse all agents with search, category, and status filters - **Technical Scoring** — Weighted scores across reliability, latency, tool use, safety, maintainability, and documentation - **Eval Tracking** — Per-suite pass rates, case-level results, latency, and failure notes",
     "category": "internal",
     "status": "beta",
     "version": "0.1.0",
     "owner": "Varun Pandey",
     "team": "FieldAssist",
     "tags": [
+      "github",
       "catalog",
       "gtm",
       "evals",
@@ -509,17 +537,17 @@
       "github-import",
       "nextjs"
     ],
-    "icon": "🏪",
+    "icon": "🤖",
     "repoUrl": "https://github.com/varunn12/Agentstore",
     "createdAt": "2026-07-02T00:00:00.000Z",
-    "updatedAt": "2026-07-02T00:00:00.000Z",
+    "updatedAt": "2026-07-02T21:03:46.393Z",
     "technicalScores": {
-      "reliability": 78,
-      "latency": 85,
-      "toolUse": 80,
-      "safety": 72,
-      "maintainability": 82,
-      "documentation": 88
+      "reliability": 70,
+      "latency": 70,
+      "toolUse": 70,
+      "safety": 70,
+      "maintainability": 70,
+      "documentation": 70
     },
     "scoreNotes": {
       "toolUse": "GitHub repo import, REST API for agent CRUD, and Vercel Blob persistence.",
@@ -529,7 +557,7 @@
     "evalSuites": [],
     "gtm": {
       "tagline": "Discover, evaluate, and launch every agent in your portfolio",
-      "valueProposition": "One place to catalog agents, track technical scores and eval pass rates, monitor GTM readiness, and compare builders — with GitHub import and a team dashboard.",
+      "valueProposition": "Central hub to catalog, score, and launch agents — technical evals, GTM readiness, and builder leaderboards.",
       "targetAudience": [
         "Product teams shipping agents",
         "Platform engineers",
@@ -571,6 +599,30 @@
         {
           "item": "CI-connected eval score updates",
           "completed": false
+        },
+        {
+          "item": "Agent manifest published",
+          "completed": false
+        },
+        {
+          "item": "0 action(s) defined",
+          "completed": false
+        },
+        {
+          "item": "Load test verified",
+          "completed": false
+        },
+        {
+          "item": "Product demo video recorded",
+          "completed": false
+        },
+        {
+          "item": "Sales one-pager published",
+          "completed": false
+        },
+        {
+          "item": "Customer case study",
+          "completed": false
         }
       ]
     }
@@ -578,21 +630,21 @@
   {
     "slug": "momentum",
     "name": "Momentum",
-    "description": "Sales execution dashboard with Zoho CRM sync, AOP scorecards, and Weekly Pulse pipeline reviews.",
+    "description": "Agent imported from varunn12/momentum",
     "longDescription": "Momentum is a sales execution dashboard built on Next.js + Prisma. It combines Zoho CRM deal sync, AOP tracking, Weekly Pulse reviews, and controlled Google-auth access for sales, managers, and admins. - AOP scorecard with org/cohort/rep drill-down - Weekly Pulse with pipeline health, wins/losses, stalled deals, and review notes - Zoho deal sync (incremental and full)",
-    "category": "sales",
+    "category": "internal",
     "status": "draft",
     "version": "0.1.0",
     "owner": "varunn12",
     "team": "varunn12",
     "tags": [
+      "github",
       "sales",
       "zoho",
       "dashboard",
-      "nextjs",
-      "github"
+      "nextjs"
     ],
-    "icon": "📈",
+    "icon": "🤖",
     "repoUrl": "https://github.com/varunn12/momentum",
     "technicalScores": {
       "reliability": 70,
@@ -605,7 +657,7 @@
     "evalSuites": [],
     "gtm": {
       "tagline": "Run sales execution with AOP scorecards and weekly pipeline pulse",
-      "valueProposition": "Unify Zoho CRM deal sync, annual operating plan tracking, and Weekly Pulse reviews in one dashboard for reps, managers, and admins.",
+      "valueProposition": "Agent imported from varunn12/momentum",
       "targetAudience": [
         "Sales reps and account executives",
         "Sales managers and leadership",
@@ -645,6 +697,6 @@
     },
     "id": "72d0848a-462d-4ee0-8e31-296ea08021ce",
     "createdAt": "2026-07-02T20:49:44.542Z",
-    "updatedAt": "2026-07-02T20:49:44.542Z"
+    "updatedAt": "2026-07-02T21:03:48.714Z"
   }
 ]
